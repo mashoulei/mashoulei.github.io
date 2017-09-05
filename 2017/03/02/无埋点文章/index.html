@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="##网易HubbleData无埋点SDK在iOS端的设计与实现 目录 0  引言 一、埋点简介 1.1 三种埋点的实现方式简介  1.2 无埋点SDK设计详细流程   二、事件唯一ID的确定     2.1 控件的层级结构path构造     2.1.1 普通view的层级结构path构造     2.1.2 几种特殊情况的处理       2.2 当前页面controller的获取   三、无埋">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hexo">
+<meta property="og:url" content="http://yoursite.com/2017/03/02/无埋点文章/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="##网易HubbleData无埋点SDK在iOS端的设计与实现 目录 0  引言 一、埋点简介 1.1 三种埋点的实现方式简介  1.2 无埋点SDK设计详细流程   二、事件唯一ID的确定     2.1 控件的层级结构path构造     2.1.1 普通view的层级结构path构造     2.1.2 几种特殊情况的处理       2.2 当前页面controller的获取   三、无埋">
+<meta property="og:image" content="http://ofwsr8cl0.bkt.clouddn.com/%E6%A6%82%E8%A7%88.jpg?imageView/2/w/600">
+<meta property="og:image" content="http://ofwsr8cl0.bkt.clouddn.com/%E4%BA%8B%E4%BB%B6.jpg?imageView/2/w/600">
+<meta property="og:image" content="http://ofwsr8cl0.bkt.clouddn.com/%E5%AE%9E%E6%97%B6.jpg?imageView/2/w/600">
+<meta property="og:image" content="http://ofwsr8cl0.bkt.clouddn.com/1.1.jpg?imageView/2/w/700">
+<meta property="og:image" content="http://ofwsr8cl0.bkt.clouddn.com/111.jpg?imageView/2/w/700">
+<meta property="og:image" content="http://ofwsr8cl0.bkt.clouddn.com/a001fa1c49889ec62e6aab38ea46d97e.jpg?imageView/2/w/550">
+<meta property="og:image" content="http://ofwsr8cl0.bkt.clouddn.com/d0e3226a902872499b6f6a9b2daf0dce.jpg?imageView/2/w/600">
+<meta property="og:image" content="http://ofwsr8cl0.bkt.clouddn.com/6ff5a9c6bf8a37837c94b7e36077f658.jpg?imageView/2/w/500">
+<meta property="og:image" content="http://ofwsr8cl0.bkt.clouddn.com/5987b2308a7e81e23f58f2c73c0b9013.jpg?imageView/2/w/360">
+<meta property="og:image" content="http://ofwsr8cl0.bkt.clouddn.com/76cea2c617f7f694a1451072946b75e9.jpg?imageView/2/w/365">
+<meta property="og:image" content="http://ofwsr8cl0.bkt.clouddn.com/fe80e4df8e91d7161ce09ef825964398.jpg?imageView/2/w/500">
+<meta property="og:image" content="http://ofwsr8cl0.bkt.clouddn.com/8104c8074bcc05f53046e14d57312f88.jpg?imageView/2/w/500">
+<meta property="og:image" content="http://ofwsr8cl0.bkt.clouddn.com/bar1.jpg?imageView/2/w/400">
+<meta property="og:image" content="http://ofwsr8cl0.bkt.clouddn.com/bar2.jpg?imageView/2/w/400">
+<meta property="og:image" content="http://ofwsr8cl0.bkt.clouddn.com/kaola.jpeg?imageView/2/w/250">
+<meta property="og:image" content="http://ofwsr8cl0.bkt.clouddn.com/yanxuan.jpeg?imageView/2/w/250">
+<meta property="og:image" content="http://ofwsr8cl0.bkt.clouddn.com/2.2.jpg?imageView/2/w/700">
+<meta property="og:image" content="http://ofwsr8cl0.bkt.clouddn.com/3.1.jpg?imageView/2/w/700">
+<meta property="og:image" content="http://ofwsr8cl0.bkt.clouddn.com/3.2.jpg?imageView/2/w/550">
+<meta property="og:image" content="http://ofwsr8cl0.bkt.clouddn.com/controlhook.jpg?imageView/2/w/600">
+<meta property="og:image" content="http://ofwsr8cl0.bkt.clouddn.com/%E5%90%8C%E7%B1%BB%E5%85%83%E7%B4%A0.jpg?imageView/2/w/300">
+<meta property="og:image" content="http://ofwsr8cl0.bkt.clouddn.com/tableviewhook.jpg?imageView/2/w/750">
+<meta property="og:image" content="http://ofwsr8cl0.bkt.clouddn.com/gesturehook.jpg?imageView/2/w/750">
+<meta property="og:image" content="http://ofwsr8cl0.bkt.clouddn.com/3.5%281%29.jpg?imageView/2/w/750">
+<meta property="og:image" content="http://ofwsr8cl0.bkt.clouddn.com/3.5%282%29.jpg?imageView/2/w/750">
+<meta property="og:updated_time" content="2017-04-22T02:52:24.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Hexo">
+<meta name="twitter:description" content="##网易HubbleData无埋点SDK在iOS端的设计与实现 目录 0  引言 一、埋点简介 1.1 三种埋点的实现方式简介  1.2 无埋点SDK设计详细流程   二、事件唯一ID的确定     2.1 控件的层级结构path构造     2.1.1 普通view的层级结构path构造     2.1.2 几种特殊情况的处理       2.2 当前页面controller的获取   三、无埋">
+<meta name="twitter:image" content="http://ofwsr8cl0.bkt.clouddn.com/%E6%A6%82%E8%A7%88.jpg?imageView/2/w/600">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/03/02/无埋点文章/"/>
+
+
+
+
+
+  <title> | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/03/02/无埋点文章/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline"></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-03-02T20:14:14+08:00">
+                2017-03-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>##网易HubbleData无埋点SDK在iOS端的设计与实现</p>
+<h3 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h3><ul>
+<li><a href="#0">0  引言</a></li>
+<li><a href="#1">一、埋点简介</a><ul>
+<li><a href="#1.1">1.1 三种埋点的实现方式简介</a> </li>
+<li><a href="#1.2">1.2 无埋点SDK设计详细流程</a></li>
+</ul>
+</li>
+<li><a href="#2">二、事件唯一ID的确定</a><ul>
+<li><a href="#2.1">    2.1 控件的层级结构path构造</a><ul>
+<li><a href="#2.1.1">    2.1.1 普通view的层级结构path构造</a></li>
+<li><a href="#2.1.2">    2.1.2 几种特殊情况的处理</a></li>
+</ul>
+</li>
+<li><a href="#2.2">    2.2 当前页面controller的获取</a></li>
+</ul>
+</li>
+<li><a href="#3">三、无埋点的采集的实现</a><ul>
+<li><a href="#3.1">    3.1 AOP 简介</a></li>
+<li><a href="#3.2">    3.2 UIViewController的无埋点采集</a></li>
+<li><a href="#3.3">    3.3 UIControl的无埋点采集</a><ul>
+<li><a href="#3.3.1">    3.3.1 UITextField</a></li>
+<li><a href="#3.3.2">    3.3.2 UIButton</a></li>
+<li><a href="#3.3.3">    3.3.3 UISwitch</a></li>
+<li><a href="#3.3.4">    3.3.4 其余UIControl</a></li>
+</ul>
+</li>
+<li><a href="#3.4">    3.4 UITableView和UICollectionView的无埋点采集</a></li>
+<li><a href="#3.5">    3.5 UIGestureRecognizer的无埋点采集</a></li>
+</ul>
+</li>
+<li><a href="#4">四、总结</a></li>
+</ul>
+<h3 id="0-引言"><a href="#0-引言" class="headerlink" title="0 引言    "></a><h2 id="0">0 引言    </h2></h3><p>最近在负责公司的HubbleData的埋点SDK的开发任务，产品的雏形其实在几年前就已经有了，公司内部的诸如考拉、易信、LOFTER、美学、漫画等多款产品都已接入使用。</p>
+<p>下图给出HubbleData SDK某个应用的部分分析的展示页面：</p>
+<p><strong>（1）概览示意图</strong> </p>
+<center> <img src="http://ofwsr8cl0.bkt.clouddn.com/%E6%A6%82%E8%A7%88.jpg?imageView/2/w/600" alt="事件"></center>
+
+<p><strong>（2）事件分析示意图</strong> </p>
+<center> <img src="http://ofwsr8cl0.bkt.clouddn.com/%E4%BA%8B%E4%BB%B6.jpg?imageView/2/w/600" alt="事件"></center>
+
+<p><strong>（3）实时分析示意图</strong></p>
+<center> <img src="http://ofwsr8cl0.bkt.clouddn.com/%E5%AE%9E%E6%97%B6.jpg?imageView/2/w/600" alt="事件"></center>
+
+<p>此外HubbleData平台还具备留存分析、漏斗分析、粘性分析、数据看板等多种功能，方便相关负责人员对产品用户行为进行进一步的探索分析。</p>
+<p>老版本的SDK的设计是代码埋点实现的，虽然对于一些较为成熟的产品，代码埋点完全能够达到产品方的需求，但是对于一些新起步或者需频繁变更的需求的新产品等，考虑到其维护的成本大，代价高等缺点，HubbleData无埋点SDK的设计就显得尤为重要了。</p>
+<p>本人主要负责iOS端无埋点以及可视化圈选的工作，文章主要系统讲解一下HubbleData无埋点SDK在iOS端的设计与实现和一些相关问题的解决，后续将针对整个埋点的实现流程与可视化圈选等内容再作分享。</p>
+<h3 id="一、埋点简介"><a href="#一、埋点简介" class="headerlink" title="一、埋点简介"></a><h2 id="1">一、埋点简介</h2></h3><h4 id="1-1-三种埋点的实现方式简介"><a href="#1-1-三种埋点的实现方式简介" class="headerlink" title="1.1 三种埋点的实现方式简介"></a><h2 id="1.1">1.1 三种埋点的实现方式简介</h2></h4><p>埋点的方式分为三类：代码埋点、可视化埋点和无埋点。这里简单的介绍一下三种埋点方式：</p>
+<p>(1) 代码埋点即是在代码的关键部位植入所要收集数据的N行代码，需要挖开产品本身，深入了解产品的业务逻辑及项目结构，下面代码模拟展示的即是点击提交订单的时候HubbleData SDK代码埋点；</p>
+<center><img src="http://ofwsr8cl0.bkt.clouddn.com/1.1.jpg?imageView/2/w/700" alt="无埋点数据收集流程"></center>
+
+<p>(2) 可视化埋点即用可视化交互的方式圈选出所要采集数据的控件，当用户行为产生时，即可收集到相应的埋点数据。相比于前面的代码埋点而言，可视化埋点能够解决代码埋点代价大成本高的问题，但是无法灵活的自定义埋点属性。</p>
+<center><img src="http://ofwsr8cl0.bkt.clouddn.com/111.jpg?imageView/2/w/700" alt="可视化埋点流程"></center>
+
+<p>(3) 无埋点也叫全埋点，即不需要用户主动埋点，可以收集用户所有的操作行为，同样采用可视化圈选，用户能够拿到所想采集的埋点数据，能够解决可视化圈选中数据不可回溯的问题。下图给出了无埋点数据收集的简单流程。</p>
+<center><img src="http://ofwsr8cl0.bkt.clouddn.com/a001fa1c49889ec62e6aab38ea46d97e.jpg?imageView/2/w/550" alt="无埋点数据收集流程"></center>
+
+<p>HubbleData SDK的设计主要是代码埋点结合无埋点的数据采集方式，其中也涉及到可视化埋点中的屏幕序列化及事件绑定机制，本文主要介绍一下无埋点的设计与实现。</p>
+<h4 id="1-2-无埋点SDK设计详细流程"><a href="#1-2-无埋点SDK设计详细流程" class="headerlink" title="1.2 无埋点SDK设计详细流程"></a><h2 id="1.2">1.2 无埋点SDK设计详细流程</h2></h4><p>下图给出HubbleData无埋点SDK在iOS端的设计实现：</p>
+<center><img src="http://ofwsr8cl0.bkt.clouddn.com/d0e3226a902872499b6f6a9b2daf0dce.jpg?imageView/2/w/600" alt="无埋点数据收集流程"></center>
+
+<p>从上图可以看出，HubbleData的无埋点是在代码埋点的基础上实现的，所处无埋点的难点也就集中在以下三个方面：</p>
+<pre><code>（1）自动获取埋点的EventID
+（2）自动获取埋点的时机
+（3）自动获取埋点需采集的属性
+</code></pre><p>本文主要就这三个方面进行分析，第二部分主要讲一下事件唯一ID的确定，第三部分主要讲一下无埋点的采集的实现，主要是各种事件发生采集的时机以及待采集的属性的配置。</p>
+<p>HubbleData SDK还涉及到许多其他功能，包括屏幕序列可视化、代码埋点、精准渠道追踪等，这里不再介绍，后面会陆续分享相关的技术实现。</p>
+<h3 id="二、事件唯一ID的确定"><a href="#二、事件唯一ID的确定" class="headerlink" title="二、事件唯一ID的确定"></a><h2 id="2">二、事件唯一ID的确定</h2></h3><p>为了实现在可视化圈选的时的事件的唯一性，每一个无埋点的事件采集都必须有且仅有一个唯一的标识符来区分不同的事件。不同于代码埋点，用户可以自定义的配置自己所需的EventID，无埋点过程中，需要SDK自己配置每一个采集事件的EventID，通过可视化圈选的操作，筛选出相应的EventID所对应的数据信息。HubbleData采用的是构造view唯一标识字符串的方式去唯一的标识这样的一个事件，主要由view的层级结构path路径、该view的所在页面类名以及view所带的一些自身固定属性等构成，并通过SHA256编码来获取唯一的EventID。</p>
+<p>下面将整体系统介绍一些事件唯一ID的生成过程。</p>
+<h4 id="2-1-控件的层级结构path构造"><a href="#2-1-控件的层级结构path构造" class="headerlink" title="2.1 控件的层级结构path构造"></a><h2 id="2.1">2.1 控件的层级结构path构造</h2></h4><h5 id="2-1-1-普通view的层级结构path构造"><a href="#2-1-1-普通view的层级结构path构造" class="headerlink" title="2.1.1 普通view的层级结构path构造"></a><h2 id="2.1.1">2.1.1 普通view的层级结构path构造</h2></h5><p>层级结构path主要是基于页面的控件树构造而成，每个view都有superview与subviews的属性，将每一个view的superview作为树的父节点，将其subviews作为子节点，这样就能把整个app上的所有view组成一棵庞大的控件树，其中树的顶层是UIWindow，然后是每一个view节点依次向下展开。下图给出一个简单的控件树的结构图。</p>
+<center><img src="http://ofwsr8cl0.bkt.clouddn.com/6ff5a9c6bf8a37837c94b7e36077f658.jpg?imageView/2/w/500" alt="空间树结构"></center>
+
+<p>下面会详细介绍一下HubbleData的唯一标识路径的构造方式。</p>
+<center><img src="http://ofwsr8cl0.bkt.clouddn.com/5987b2308a7e81e23f58f2c73c0b9013.jpg?imageView/2/w/360" alt="不同类">   <img src="http://ofwsr8cl0.bkt.clouddn.com/76cea2c617f7f694a1451072946b75e9.jpg?imageView/2/w/365" alt="同类"></center>
+
+<p>像上图1所示，如果一个view的subviews中都是不同类型的，比如像下图图1所示的控件树那样，可以唯一标识UILabel和UIButton控件为：</p>
+<pre><code>UIView_UILabel
+UIView_UIButton
+</code></pre><p>但是真正的页面是不会像理想中的所有控件都是不同类型的，可以说这种极端情况基本不存在，如果还是按照上述的方法来构造路径的话，两个UILabel都会被标识成UIView_UILabel，这显然无法区分两个控件。因此仅仅是每个控件节点的路径名称是无法唯一标识这个控件的，这里HubbleData加入了此控件节点在父视图中的<strong>index</strong>。比如上图2，可以将两个UILabel标识为:</p>
+<pre><code>UIView(0)_UILabel(0)
+UIView(0)_UILabel(1)
+</code></pre><p>这里假设父视图是index为0的一个节点，这样就可以完全的区分出两个控件了。</p>
+<p>那么剩下的问题就是每个UIView index索引值的确定。</p>
+<p>每个UIView都有subviews属性，每一个子视图都有一个被addsubView的次序，其实要拿的这个index就是子视图被add的次序，那么该怎么拿到这个次序呢，在苹果的官方说明文档中，岁UIView的subviews属性，是这么介绍的：</p>
+<pre><code>@property(nonatomic, readonly, copy) NSArray *subviews
+
+You can use this property to retrieve the subviews associated with your custom view hierarchies. 
+The order of the subviews in the array reflects their visible order on the screen.
+</code></pre><p>即每一个子视图在这个subviews数组中的索引就是HubbleData要拿的index。</p>
+<p>针对复杂的视图形式，如下图所示，按照上述的层级结构路径构造方法得到的唯一层级路径为：</p>
+<pre><code>UIView(0)_UILabel(0)
+UIView(0)_UIButton(1)
+UIView(0)_UIButton(2)  
+</code></pre><center><img src="http://ofwsr8cl0.bkt.clouddn.com/fe80e4df8e91d7161ce09ef825964398.jpg?imageView/2/w/500" alt="混合"></center>
+
+<p>从上述的分析可知，按照上述介绍的方法进行view的唯一层级路径标识，对大部分的页面来说已经足够，但是对于一些更为灵活点的页面，由于一些业务需求等原因，开发人员经常会调用removeFromSuperview, insertSubview:atIndex:, insertSubview: belowSubview:等函数，都会极大的影响整个页面的subviews的索引值，比如现在我将上图所示的UILabel移动到两个UIButton的后边，那么得到的唯一层级路径为：</p>
+<pre><code>UIView(0)_UIButton(0)
+UIView(0)_UIButton(1)
+UIView(0)_UILabel(2)  
+</code></pre><center><img src="http://ofwsr8cl0.bkt.clouddn.com/8104c8074bcc05f53046e14d57312f88.jpg?imageView/2/w/500" alt="混合"></center>
+
+<p>可以发现，唯一层级路径已经被改变，但是整个页面却没有发生变化，不仅会产生新的事件（比如UIButton(0)，UILabel(2)），连UIButton(1)事件的采集也会出错，即使是不同的事件，却得到了不同的eventID，所以需要提高构造的层级结构路径的稳健型。</p>
+<p>正像刚刚提到的，不同类型的UIView不需要做index的区分，那么在获取这个index的时候，不是简单的从subviews这个数组中获取其对应的索引值，而是进行一个简单的同类归并再取索引值，一个很简单的处理。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">for</span> (<span class="built_in">UIView</span> *view <span class="keyword">in</span> subviews) &#123;</div><div class="line">    <span class="keyword">if</span> ([<span class="built_in">NSStringFromClass</span>([subview <span class="keyword">class</span>]) isEqualToString:<span class="built_in">NSStringFromClass</span>(<span class="keyword">class</span>)]) &#123; <span class="comment">//class为待筛选的类</span></div><div class="line">        [array addObject:view];</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这样就可以取得array中的index作为其真正的索引值，得到的层级结构路径为：</p>
+<pre><code>UIView(0)_UILabel(0)
+UIView(0)_UIButton(0)
+UIView(0)_UIButton(1) 
+</code></pre><p>此时无论UIlabel的位置放在何处，都不会改变这个路径的构造形式，大大增加了稳健型。其实也能发现，这仅仅只能提高稳健型，并不能从根本上解决这个问题，比如若我把两个UIButton的顺序调换了，或者删除了第一个，此时依然会得到一些不准确的层级路径。此问题会后续解决，会逐步引入误差容量和相似度这个概念，即只要在误差范围内，则会进行进一步的匹配，具体的解决方案本篇不在介绍。</p>
+<h5 id="2-1-2-几种特殊情况的处理"><a href="#2-1-2-几种特殊情况的处理" class="headerlink" title="2.1.2 几种特殊情况的处理"></a><h2 id="2.1.2">2.1.2 几种特殊情况的处理</h2></h5><p>2.1.1主要讲的是一些普通view的层级结构的path构造方式，但是有一些特殊情况需要特别的考虑处理：</p>
+<ul>
+<li><strong>UITableViewCell</strong></li>
+</ul>
+<p>由于UITableViewCell具有可复用的机制，当一个页面中在持续滚动的时候，cell在不断的复用，如果还使用2.1.1中介绍的方法来获取index索引值话，那么会引起整个页面无埋点数据采集的混乱。</p>
+<p>当获取当前UITableViewCell的index时，可以使用indexPath参数进行替换，这个参数可准确的获取section和row的值，唯一的对应每一个cell。唯一层级路径的形式可以自定义配置，HubbleData的设置方式为：类名+(section: row:)，下面给出一个示例：</p>
+<pre><code>MyTableViewCell(section:0 row:7)
+</code></pre><ul>
+<li><strong>UICollectionViewCell</strong></li>
+</ul>
+<p>UICollectionViewCell的path生成原理同UITableViewCell，HubbleData的设置方式为：类名+(section:item:)，下面给出一个示例：</p>
+<pre><code>MyCollectionViewCell(section:0 item:7)
+</code></pre><ul>
+<li><strong>UIControl</strong></li>
+</ul>
+<p>其实UIButton也算是一种普通view的一种，大多数情况下，使用上述的层级结构path以及页面类名的组合能够唯一的确定当前UIControl的唯一标识符，但是有一种特殊的情况，当作为UINavigationItem时会出现特殊情况，下面的所给出的两个例子。</p>
+<center><img src="http://ofwsr8cl0.bkt.clouddn.com/bar1.jpg?imageView/2/w/400" alt="bar1"></center>
+
+<center><img src="http://ofwsr8cl0.bkt.clouddn.com/bar2.jpg?imageView/2/w/400" alt="bar2"></center>
+
+<p>当点击第一个NavigationBar的右侧的按钮时，得到的层级路径为：</p>
+<pre><code>...UIViewControllerWrapperView(0)_UIView(0)_UILayoutContainerView(0)_UINavigationBar(0)_UIButton(1)
+</code></pre><p>分析可知，左侧的设置按钮的索引为0，所以右侧的按钮索引为1。同时获取的当前页面为：UINavigationController。</p>
+<p>当点击第二个页面的同一个类型的按钮时，即同样标有数字7的item时，此时得到的层级路径为：</p>
+<pre><code>...UIViewControllerWrapperView(0)_UIView(0)_UILayoutContainerView(0)_UINavigationBar(0)_UIButton(2)
+</code></pre><p>可以发现此时的按钮的索引变成了2，已经不同于上述第一个NavigationBar的同一个按钮的层级路径了，经过分析，索引值为1的按钮是最右侧的表格的那个item，经过验证可以得到其层级路径：</p>
+<pre><code>...UIViewControllerWrapperView(0)_UIView(0)_UILayoutContainerView(0)_UINavigationBar(0)_UIButton(1)
+</code></pre><p>获取的页面为：UINavigationController。</p>
+<p>其实这种页面很常见，由于页面的切换，NavigationBar上的一些按钮的位置可能顺序会打乱，导致同一个功能的NavigationItem已经无法确定标识唯一，即使是获取了当前按钮所在的页面也无法区分，因为获取的都是UINavigationController。从上面的分析可以看出，这种情况甚至会导致严重错乱的数据采集。</p>
+<p>其实仔细分析一下，如果分析得出该UIControl是在UINavigationBar上，则无需设置其相应的index值，即上述的所有navigationItem的层级结构路径都为：</p>
+<pre><code>...UIViewControllerWrapperView(0)_UIView(0)_UILayoutContainerView(0)_UINavigationBar(0)_UIButton
+</code></pre><p>即都不做区分。</p>
+<p>HubbleData采用增加一种新的属性来区分各个item，其实很明显可以看出来，这个item的执行的action肯定是不同的，所以取其action属性来区分，最终的区分形式如下：</p>
+<pre><code>path(...UIViewControllerWrapperView(0)_UIView(0)_UILayoutContainerView(0)_UINavigationBar(0)_UIButton)&amp;actions(button1Click:)
+path(...UIViewControllerWrapperView(0)_UIView(0)_UILayoutContainerView(0)_UINavigationBar(0)_UIButton)&amp;actions(button2Click:)
+</code></pre><p>这样，HubbleData就可以准确的区分不同的item了，同时实现同一种功能的item，由于其action相同，所以也会准确的标识其唯一性。</p>
+<ul>
+<li><strong>UIAlertController</strong></li>
+</ul>
+<p>由于不同的UIAlertController在选择确定、取消等选项时，选取的进行唯一层级路径判定的view需要进行一定的处理，同时为了保证不同的UIAlertController处于同一位置的选项的埋点EventID不同，这里在构造唯一标志字符串的时候还要加入该UIAlertController的message和title信息。3.5小节中会进行相关无埋点采集的介绍。</p>
+<ul>
+<li><strong>viewController的嵌套</strong></li>
+</ul>
+<p>一般情况下，普通的view只需按照一般的层次路径收集index即可，但是当存在pageViewController时，如下图所示分别给出了一个横向滚动(以公司考拉app为例)和纵向滚动（以公司严选app为例）的app的截图的示例：</p>
+<center><img src="http://ofwsr8cl0.bkt.clouddn.com/kaola.jpeg?imageView/2/w/250" alt="不同类">                      <img src="http://ofwsr8cl0.bkt.clouddn.com/yanxuan.jpeg?imageView/2/w/250" alt="不同类"></center>
+
+<p>其实可以看出，pageViewController会应用到各种各样app中，所以这类app在使用过程中的无埋点问题尤其要考虑。</p>
+<h6 id="1-各个子页面的controller不同？"><a href="#1-各个子页面的controller不同？" class="headerlink" title="(1) 各个子页面的controller不同？"></a>(1) 各个子页面的controller不同？</h6><p>如果pageViewController中的各个子页面不同，虽然后续2.2节HubbleData会加入页面controller的信息来区分这些不同的子页面，但是可能会由于每个子页面加入的顺序不同，导致每次app进来的时候同一个页面的事件会获取不同的EventID，举例来说明一下，如上图1所示，比如前四个子页面是ViewController1, ViewController2, ViewController3, ViewController4，这类pageViewController除非设置四个子页面同时预加载出来，那么此时的获取的层级路径为：</p>
+<pre><code>ViewController1对应路径为：superview(0)_subControllerView(0) 
+ViewController2对应路径为：superview(0)_subControllerView(1)
+ViewController3对应路径为：superview(0)_subControllerView(2)
+ViewController4对应路径为：superview(0)_subControllerView(3)
+</code></pre><p>但是app基本都不会预加载出所有页面，对于用户不感兴趣的页面完全没必要一次性全部加载处理，只有当用户选择了该条目时，该对应的子页面才会加载出来，如果现在用户点击的顺序是ViewController1，ViewController3，ViewController4，ViewController2，由于addChildViewController或者addSubView的顺序的改变，那么此时获取的层级路径为：</p>
+<pre><code>ViewController1对应路径为：superview(0)_subControllerView(0) 
+ViewController2对应路径为：superview(0)_subControllerView(3)
+ViewController3对应路径为：superview(0)_subControllerView(1)
+ViewController4对应路径为：superview(0)_subControllerView(2)
+</code></pre><p>可以发现，index值变了，层级路径不唯一了，那么无埋点采集的EventID可能会由于用户选择页面顺序的不同而不同，造成埋点数据的混乱。</p>
+<p>HubbleData对于此类页面的处理是，遇到此类页面，即不用index标注，所以会统一的标识成：</p>
+<pre><code>ViewController1对应路径为：superview(0)_subControllerView 
+ViewController2对应路径为：superview(0)_subControllerView
+ViewController3对应路径为：superview(0)_subControllerView
+ViewController4对应路径为：superview(0)_subControllerView
+</code></pre><p>后续可以通过不同的页面的controller的类名获取其不同的唯一标识字符串。</p>
+<h6 id="2-各个子页面的controller相同？"><a href="#2-各个子页面的controller相同？" class="headerlink" title="(2) 各个子页面的controller相同？"></a>(2) 各个子页面的controller相同？</h6><p>其实做过此类页面的基本应该都熟悉，很多情况下子页面都是共用的，只不过是填入的model不同而已，那么遇到这种情况，如果是按照问题1的解决思路，即使按照2.2拿到了当前页面的controller，那么还是无法区分出这些页面，所以还是需要设置新的具有辨识度的index。</p>
+<p>其实通过pageViewController可以发现，用户可以通过左右滑动或者上下滑动来切换子页面，说明所有的子页面都是嵌入在一个scrollView之中，那么就可以从这个scrollView入手，重新确定index。下面给出HubbleData解决这个问题的方法。</p>
+<p>一开始想使用当前scrollView的contentOffset整除此pageViewController的页面宽度和高度所得到的值作为区分子页面的index，但是考虑到可能contentOffset的连续变化以及子页面横跨pageViewController整数倍宽度的边界时，可能会导致获取的index不唯一的情况，所以后来使用该子页面的起始位置整除pageViewController的相应地宽度和高度得到相应地index。具体的实现如下，其中controller为当前的页面：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> (view == controller.view || view == controller.view.superview) &#123;</div><div class="line">     <span class="built_in">NSInteger</span> index_x = view.center.x / [view superview].frame.size.width;</div><div class="line">     <span class="built_in">NSInteger</span> index_y = view.center.y / [view superview].frame.size.height;</div><div class="line">     <span class="built_in">NSString</span> *path = [<span class="built_in">NSString</span> stringWithFormat:<span class="string">@"%@(indexx:%ld indexy:%ld)"</span>,  </div><div class="line">     		            <span class="built_in">NSStringFromClass</span>([view <span class="keyword">class</span>]), index_x, index_y];</div><div class="line"> &#125;</div></pre></td></tr></table></figure>
+<p>所以同样针对上述（1）所给出的四个ViewController1，优化后的到的唯一的标识为：</p>
+<pre><code>ViewController1对应路径为：superview(0)_subControllerView(indexx:0 indexy:0)
+ViewController2对应路径为：superview(0)_subControllerView(indexx:1 indexy:0)
+ViewController3对应路径为：superview(0)_subControllerView(indexx:2 indexy:0)
+ViewController4对应路径为：superview(0)_subControllerView(indexx:3 indexy:0)
+</code></pre><p>这样即使各个子页面的controller相同，也能通过优化后的index来区分各个不同的子页面。当然这种只是针对嵌套scrollView的子页面的情况，不过能解决大部分的该类问题，对于一些其他的特殊情况等，需详细分析页面布局进行分析。</p>
+<h4 id="2-2-当前页面controller的获取"><a href="#2-2-当前页面controller的获取" class="headerlink" title="2.2 当前页面controller的获取"></a><h2 id="2.2">2.2 当前页面controller的获取</h2></h4><p>看上去，大多数情况下2.1的view的层级结构path已经基本确定view的唯一标识字符串，但是普遍存在这么一种情况，当同一个页面跳转两个不同的页面时，假如这两个不同的页面上都取第一个按钮的层级路径，得到的简化后的结果都如下所示：</p>
+<pre><code>.../UINavigationTransitionView(0)/UIViewControllerWrapperView(0)/UIView(0)/UIButton(0)
+</code></pre><p>是无法进行这两个页面上的按钮区分的，其实页面的类名是区分的一个最直接的方式。HubbleData是按照下面的方法获取某个view所在的controller的类名的。</p>
+<center><img src="http://ofwsr8cl0.bkt.clouddn.com/2.2.jpg?imageView/2/w/700" alt="2.2"></center>
+
+<p>将view的层级路径结合当前页面的名称，已经能够解决掉大部分的唯一标识字符串的问题了。</p>
+<p>这里需要注意的一点是，当页面类型一样，只是填充的model不同时，比如浏览商品详情时，所进入的页面都是一个，只是model不同，目前HubbleData对这种情况暂时未做处理。后续可参考文章3.2节UIViewController的无埋点采集，对一些页面，用户可以自定义诸如screenTitle的字段，定义该页面的名称，比如screenTitle包含产品唯一ID时，此时将该字段加入唯一标识字符串中即可区分。目前这块还未做相关处理，这里只是提供一个简单的解决思路。</p>
+<h3 id="三、无埋点的采集的实现"><a href="#三、无埋点的采集的实现" class="headerlink" title="三、无埋点的采集的实现"></a><h2 id="3">三、无埋点的采集的实现</h2></h3><h4 id="3-1-AOP-简介"><a href="#3-1-AOP-简介" class="headerlink" title="3.1 AOP 简介"></a><h2 id="3.1">3.1 AOP 简介</h2></h4><p>下面讲一下无埋点的具体实现，用到的主要是AOP(Aspect-Oriented-Programming)，面向切面编程，面对的是处理过程中的某个步骤和方法。在运行时，动态的将代码插入到类的制定方法、指定位置上的编程思想就是面向切面编程。熟悉iOS Runtime的应该很清楚，相关的介绍文章也很多，这里不再过多的赘述。</p>
+<p>HubbleData无埋点的实现主要就是借助AOP，hook对应类的方法，并在原实现代码的基础上插入自己定义的埋点的代码，当该类的被hook的函数执行时，就能实现无埋点数据采集的功能。下面给出HubbleData里面Method Swizzling的一个简单的实现。</p>
+<center><img src="http://ofwsr8cl0.bkt.clouddn.com/3.1.jpg?imageView/2/w/700" alt="3.1"></center>
+
+<p>上述代码只是给出了一个简单的实现的逻辑结构，new_swizzledMethod也只是selector没有参数的情况（除去self和_cmd），真正在埋点的处理过程需要考虑的情况比较多。</p>
+<h4 id="3-2-UIViewController的无埋点采集"><a href="#3-2-UIViewController的无埋点采集" class="headerlink" title="3.2 UIViewController的无埋点采集"></a><h2 id="3.2">3.2 UIViewController的无埋点采集</h2></h4><p>主要是收集页面的生命周期，这里HubbleData采用的是hook UIViewController的viewWillAppear方法，按照3.1给出的方式：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[DASwizzler swizzleBoolSelector:<span class="keyword">@selector</span>(viewWillAppear:)</div><div class="line">                        onClass:[<span class="built_in">UIViewController</span> <span class="keyword">class</span>]</div><div class="line">                      withBlock:executeAppearBlock];</div></pre></td></tr></table></figure>
+<p>当viewWillAppear函数执行时，插入埋点的代码。HubbleData的设计方法为：</p>
+<p>EventID设置为固定的da_screen，即不会通过EventID来区分各个页面的信息，HubbleData将各个页面的区分信息放在了properties中，其中properties的设置为：</p>
+<pre><code>(1) $screenName 为当前页面的名称；
+(2) $screenTitle 为当前页面的title，可为空；
+</code></pre><p>同时HubbleData SDK提供了一个protocol <dascreenautotracker></dascreenautotracker></p>
+<center><img src="http://ofwsr8cl0.bkt.clouddn.com/3.2.jpg?imageView/2/w/550" alt="3.2"></center>
+
+<p>即用户可以通过实现该protocol，HubbleData SDK会将screenTitle返回的值作为页面的名称，trackProperties返回的属性加入对应页面的da_screen事件的属性中，作为用户访问该页面时的事件属性，screenUrl返回的字符串作为页面的Url，用于做一些页面之间相互跳转的分析等。</p>
+<p>同时增加了白名单设置，有一些UIViewController的信息用户不想采集，可以通过设置白名单的方式，将一些不想采集的UIViewController过滤掉，比如说SFBrowserRemoteViewController，UIInputWindowController等系统自带的一些。</p>
+<p>最后会调用trackEvent记录该采集的事件，同上述介绍的代码埋点一样，调用的方法如下：</p>
+<pre><code>[[DATracker sharedTracker] trackScreenEvent:@“da_screen” withAttributes:properties];
+</code></pre><p>其中properties即为上述要采集的一些属性。</p>
+<h4 id="3-3-UIControl的无埋点采集"><a href="#3-3-UIControl的无埋点采集" class="headerlink" title="3.3 UIControl的无埋点采集"></a><h2 id="3.3">3.3 UIControl的无埋点采集</h2></h4><p>针对UIControl，HubbleData采用的是hook UIControl的sendAction:to:forEvent:方法。由官方文档可知，在UIControl执行对应的action时都会首先调用sendAction:to:forEvent:方法，实现如下：</p>
+<center><img src="http://ofwsr8cl0.bkt.clouddn.com/controlhook.jpg?imageView/2/w/600" alt="control"></center>
+
+<p>考虑到UIControl的子类较多，所以HubbleData选取了其中使用较多的几种进行了特殊的分析：主要是UITextField、UIButton和UISwitch，其余的暂时未做特殊分析。具体的埋点的采集设计为：</p>
+<p>无论是哪种UIControl，EventID均采用的是第三部分介绍的唯一标识字符串的SHA256编码值，但是相关采集properties有所差别。</p>
+<h5 id="3-3-1-UITextField"><a href="#3-3-1-UITextField" class="headerlink" title="3.3.1 UITextField"></a><h2 id="3.3.1">3.3.1 UITextField</h2></h5><p>UITextField是UIControl的一个子类，由于UITextField涉及到用户的隐私比较多，比如用户名、密码、聊天文本等，所以HubbleData不会对此类的UITextField进行埋点的采集。</p>
+<p>HubbleData主要采集的是UISearchBar中的UITextField，即UISearchBarTextField，并获取搜索的文本内容，这对于一些电商类的App来说，能够较好的分析用户感兴趣的商品等，这是作为HubbleData SDK无埋点的一个需求。</p>
+<p>hook住sendAction:to:forEvent:后，如果对UISearchBarTextField的所有actions都进行hook的话，那么_searchFieldBeginEditing、_searchFieldEndEditing等所有的action发生的时候都会进行数据的采集，会采集到很多无用的信息，导致采集的数据混乱。HubbleData SDK只有当_searchFieldEndEditing action发生时才会进行埋点，收集的properties为：</p>
+<pre><code>(1) type 为UIControl采集的事件类型，这里设置为searchBarEvent；
+(2) page 为当前页面的名称，用于前端显示用；
+(3) searchText 为_searchFieldEndEditing发生时采集到搜索框的搜索文字（此字段不为空）；
+</code></pre><p>这样就能对搜索框进行无埋点采集，并能收集搜索的文本内容。此方法只是在_searchFieldEndEditing发生时采集数据，有可能该action执行时并未尽兴真正的搜索操作，可能会与业务数据库的数据有出入，但是也能够较为准确的分析用户感兴趣的搜索内容。</p>
+<h5 id="3-3-2-UIButton"><a href="#3-3-2-UIButton" class="headerlink" title="3.3.2 UIButton"></a><h2 id="3.3.2">3.3.2 UIButton</h2></h5><p>UIControl中使用最多最常见的是UIButton，因此对UIButton的采集非常重要。在使用UIButton的时候可以随意的设置其title等属性来表示业务逻辑的不同状态。这里可以举一个简单的例子：基本app的登录页面，在用户名和密码都未输入时、都输入时以及登录中各个状态，登录按钮的title、titleColor等属性可能都是不同的，即每一种button的样式都代表着一种样式，但是得到的EventID是相同的。针对此种情况，HubbleData会加入title、titleColor作为属性值，以方便后台进行进一步的分析。</p>
+<p>当按钮的两种状态只是两种不同的背景图片时，比如微博或者微信的点赞等，其实是变换了一种背景图片，针对对这种情况处理，HubbleData则会获取图片的imageName作为其中一个属性。</p>
+<pre><code>(1) type 为UIControl采集的事件类型，这里设置为buttonEvent；
+(2) page 为当前页面的名称，用于前端显示用；
+(3) title 为当前按钮的title；
+(4) titleColor 为当前title的color，会转换成字符串的形式，rgba(r, g, b, alpha)；
+(5) imageName 为当前按钮的背景图片的name;
+(6) frame 为UIButton的frame，用于分析同类元素,会转换成字符串的形式,rect(x, y, width, height)；
+</code></pre><p>可以看出，HubbleData还采集了该view的frame信息，主要是用来分析同类元素用的，下图给出一个简单的示例：</p>
+<center><img src="http://ofwsr8cl0.bkt.clouddn.com/%E5%90%8C%E7%B1%BB%E5%85%83%E7%B4%A0.jpg?imageView/2/w/300" alt="bar1"></center>
+
+<p>目前有六个已关注的产品，当想统计用户所有点赞的事件时，由于每个点赞的按钮都处于一个UITableViewCell中，在前面介绍的获取层级唯一路径UITableViewCell时的特殊处理，由于每个按钮所在的cell的row不同，所以获得的每个按钮的事件的唯一EventID都是不同的，这样后端在分析的时候，无法归类同类元素。当HubbleData给出frame时，后端可以根据frame归类出同一类按钮的事件，具体的归类策略这里不再介绍。</p>
+<h5 id="3-3-3-UISwitch"><a href="#3-3-3-UISwitch" class="headerlink" title="3.3.3 UISwitch"></a><h2 id="3.3.3">3.3.3 UISwitch</h2></h5><p>类似于UIButton，只不过这里要采集switchState，即当前的开关状态，具体的采集属性为：</p>
+<pre><code>(1) type 为UIControl采集的事件类型，这里设置为switchEvent；
+(2) page 为当前页面的名称，用于前端显示用；
+(3) switchState 为switch的开关状态；
+</code></pre><h5 id="3-3-4-其余UIControl"><a href="#3-3-4-其余UIControl" class="headerlink" title="3.3.4 其余UIControl"></a><h2 id="3.3.4">3.3.4 其余UIControl</h2></h5><p>其余的只是采集type，page属性，目前未做过多的处理。</p>
+<h4 id="3-4-UITableView和UICollectionView的无埋点采集"><a href="#3-4-UITableView和UICollectionView的无埋点采集" class="headerlink" title="3.4 UITableView和UICollectionView的无埋点采集"></a><h2 id="3.4">3.4 UITableView和UICollectionView的无埋点采集</h2></h4><p>针对UITableView和UICollectionView，HubbleData采用的是先hook UITableView和UICoolectionView的setDelegate:方法，然后找到对应的delegate，然后再hook delegate类中的tableView:didSelectRowAtIndexPath:方法和UICollectionView的collectionView:didSelectItemAtIndexPath:方法。这里以UITableView为例：</p>
+<center><img src="http://ofwsr8cl0.bkt.clouddn.com/tableviewhook.jpg?imageView/2/w/750" alt="tableview"></center>
+
+<p>EventID按照上述介绍的方法获取，只不过这里要注意的是，获取的并不是UITableView的唯一标识字符串而是对应的点击的cell的唯一标识字符串。采集的properties为：</p>
+<pre><code>(1) type 为UITableView采集的事件类型，这里设置为tableViewSelectEvent；
+(2) page 为当前页面的名称，用于前端显示用；
+(3) section 为点击的cell所在的section；
+(4) row 为点击的cell所在的row；
+</code></pre><h4 id="3-5-UIGestureRecognizer的无埋点采集"><a href="#3-5-UIGestureRecognizer的无埋点采集" class="headerlink" title="3.5 UIGestureRecognizer的无埋点采集"></a><h2 id="3.5">3.5 UIGestureRecognizer的无埋点采集</h2></h4><p>在iOS开发中，经常会使用一些手势来处理一些点击的操作，所以也有必要对UIGestureRecognizer进行hook。HubbleData 并不是直接针对UIGestureRecognizer这个类进行hook，而是hook UIView类的addGestureRecognizer:方法，实现如下：</p>
+<center><img src="http://ofwsr8cl0.bkt.clouddn.com/gesturehook.jpg?imageView/2/w/750" alt="gesture"></center>
+
+<p>通过hook addGestureRecognizer:方法，可以得到该UIView所添加的UIGestureRecognizer，这里只对UITapGestureRecognizer和UILongPressGestureRecognizer进行处理，其他的手势暂未做处理。得到相应的UIGestureRecognizer，添加一个action，当该手势执行的时候，同样会执行该action，在action中执行埋点的操作。</p>
+<p>这里获取的是UIGestureRecognizer所在的UIView的唯一标识标识字符串编码作为EventID,采集的属性为：</p>
+<pre><code>(1) type 为UIGestureRecognizer采集的事件类型，这里设置为gestureTapEvent；
+(2) page 为当前页面的名称，用于前端显示用；
+</code></pre><p><strong>UIAlertController的特殊处理</strong></p>
+<p>这里需要对UIAlertController做一个详细的说明，因为UIAlertController在点击诸如取消、确定的选项按钮时，也会进行手势的埋点采集，但是在iOS9和iOS10上略微有些区别。</p>
+<p>这里先以iOS9为例，其target是作用在_UIAlertControllerView这个系统的私有类上的，如果直接对这个_UIAlertControllerView进行唯一标识字符串的构造，则取消和确定选项得到的EventID是相同的，这样将无法准确的分析出用户的选择，所以必须以每个选项view作为单独的唯一标识字符串进行分析才能准确区分。通过获取_UIAlertControllerView的_actionViews变量，就能得到各个选项的view，这里要做一个简单的点击坐标获取，判断所点击的区域位于的actionView，具体实现如下：</p>
+<center><img src="http://ofwsr8cl0.bkt.clouddn.com/3.5%281%29.jpg?imageView/2/w/750" alt="3.5"></center>
+
+<p>这里在条件判断时设定gesture.state == UIGestureRecognizerStateBegan，是由于UILongPressGestureRecognizer会连续两次调用action，因此这里需要加入事件的状态进行区分，防止进行两次相同的数据采集。</p>
+<p>iOS10下的UIAlertController的内部实现做了一些改动，其target变换成在_UIAlertControllerInterfaceActionGroupView这个系统的私有类上的，然后需要进行一定的处理，获取UIInterfaceActionSelectionTrackingController的_representationViews变量，遍历得到各个选项的view，具体实现如下：</p>
+<center><img src="http://ofwsr8cl0.bkt.clouddn.com/3.5%282%29.jpg?imageView/2/w/750" alt="3.1"></center>
+
+<p>通过上述的分析可以发现，这样虽然能区分同一个UIAlertController的不同的操作选项，但是可能无法区分出不同UIAlertController的处于同一位置的选项，所以这里还要加入UIAlertController额外的属性信息来区分。</p>
+<p>前面也有提过，可以很容易的想到UIAlertController的message和title能够较好的进行区分，所以在原有的层级路径和当前页面的基础上，还要加上message和title以构成唯一标识字符串。给出一个样例：</p>
+<pre><code>path(UIWindow(0)__UIAlertControllerView(0)_UIView(0)_UIView(0)_UIView(0)_UICollectionView(0)__UIAlertControllerCollectionViewCell(section:0 item:0)_UIView(0)__UIAlertControllerActionView(0))&amp;controller(UIAlertController)&amp;message(确认退出群聊吗？)&amp;title(退群)
+</code></pre><h3 id="四、总结"><a href="#四、总结" class="headerlink" title="四、总结"></a><h2 id="4">四、总结</h2></h3><p>关于HubbleData的使用以及相关产品的接入，请联系hzyanglin1@corp.netease.com<br>文章主要介绍了HubbleData无埋点SDk在iOS端的设计与实现，涉及的主要内容：事件唯一ID的确定和部分无埋点的实现，当然在无埋点SDK的设计开发中还遇到了各种各样的问题。鉴于文章的篇幅已经较长，一些问题的解决以及关键技术的实现，比如精准渠道追踪、hook冲突解决、代码埋点的实现、屏幕序列化以及可视化圈选部分的内容，本篇文章不再介绍，将会在后续文章中继续介绍。</p>
+<p>鉴于当前无埋点SDK仍在不断改进和完善中，待相关功能完善，将考虑开源HubbleData的无埋点SDK设计。由于一些原因，文章介绍的很多东西可能仍有待改进，欢迎大家一起探讨提高。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          
+            <p class="site-author-name" itemprop="name">John Doe</p>
+            <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+            
+              <a href="/archives">
+            
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">Artikel</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#目录"><span class="nav-number">1.</span> <span class="nav-text">目录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0-引言"><span class="nav-number">2.</span> <span class="nav-text">0 引言    </span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0"><span class="nav-number"></span> <span class="nav-text">0 引言    </span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#一、埋点简介"><span class="nav-number">1.</span> <span class="nav-text">一、埋点简介</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1"><span class="nav-number"></span> <span class="nav-text">一、埋点简介</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-三种埋点的实现方式简介"><span class="nav-number">0.1.</span> <span class="nav-text">1.1 三种埋点的实现方式简介</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1.1"><span class="nav-number"></span> <span class="nav-text">1.1 三种埋点的实现方式简介</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-2-无埋点SDK设计详细流程"><span class="nav-number">0.1.</span> <span class="nav-text">1.2 无埋点SDK设计详细流程</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1.2"><span class="nav-number"></span> <span class="nav-text">1.2 无埋点SDK设计详细流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#二、事件唯一ID的确定"><span class="nav-number">1.</span> <span class="nav-text">二、事件唯一ID的确定</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2"><span class="nav-number"></span> <span class="nav-text">二、事件唯一ID的确定</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-控件的层级结构path构造"><span class="nav-number">0.1.</span> <span class="nav-text">2.1 控件的层级结构path构造</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2.1"><span class="nav-number"></span> <span class="nav-text">2.1 控件的层级结构path构造</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#2-1-1-普通view的层级结构path构造"><span class="nav-number">0.0.1.</span> <span class="nav-text">2.1.1 普通view的层级结构path构造</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2.1.1"><span class="nav-number"></span> <span class="nav-text">2.1.1 普通view的层级结构path构造</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#2-1-2-几种特殊情况的处理"><span class="nav-number">0.0.1.</span> <span class="nav-text">2.1.2 几种特殊情况的处理</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2.1.2"><span class="nav-number"></span> <span class="nav-text">2.1.2 几种特殊情况的处理</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#1-各个子页面的controller不同？"><span class="nav-number">0.0.0.1.</span> <span class="nav-text">(1) 各个子页面的controller不同？</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#2-各个子页面的controller相同？"><span class="nav-number">0.0.0.2.</span> <span class="nav-text">(2) 各个子页面的controller相同？</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-当前页面controller的获取"><span class="nav-number">0.1.</span> <span class="nav-text">2.2 当前页面controller的获取</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2.2"><span class="nav-number"></span> <span class="nav-text">2.2 当前页面controller的获取</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#三、无埋点的采集的实现"><span class="nav-number">1.</span> <span class="nav-text">三、无埋点的采集的实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3"><span class="nav-number"></span> <span class="nav-text">三、无埋点的采集的实现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-AOP-简介"><span class="nav-number">0.1.</span> <span class="nav-text">3.1 AOP 简介</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3.1"><span class="nav-number"></span> <span class="nav-text">3.1 AOP 简介</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-2-UIViewController的无埋点采集"><span class="nav-number">0.1.</span> <span class="nav-text">3.2 UIViewController的无埋点采集</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3.2"><span class="nav-number"></span> <span class="nav-text">3.2 UIViewController的无埋点采集</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-3-UIControl的无埋点采集"><span class="nav-number">0.1.</span> <span class="nav-text">3.3 UIControl的无埋点采集</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3.3"><span class="nav-number"></span> <span class="nav-text">3.3 UIControl的无埋点采集</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#3-3-1-UITextField"><span class="nav-number">0.0.1.</span> <span class="nav-text">3.3.1 UITextField</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3.3.1"><span class="nav-number"></span> <span class="nav-text">3.3.1 UITextField</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#3-3-2-UIButton"><span class="nav-number">0.0.1.</span> <span class="nav-text">3.3.2 UIButton</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3.3.2"><span class="nav-number"></span> <span class="nav-text">3.3.2 UIButton</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#3-3-3-UISwitch"><span class="nav-number">0.0.1.</span> <span class="nav-text">3.3.3 UISwitch</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3.3.3"><span class="nav-number"></span> <span class="nav-text">3.3.3 UISwitch</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#3-3-4-其余UIControl"><span class="nav-number">0.0.1.</span> <span class="nav-text">3.3.4 其余UIControl</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3.3.4"><span class="nav-number"></span> <span class="nav-text">3.3.4 其余UIControl</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-4-UITableView和UICollectionView的无埋点采集"><span class="nav-number">0.1.</span> <span class="nav-text">3.4 UITableView和UICollectionView的无埋点采集</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3.4"><span class="nav-number"></span> <span class="nav-text">3.4 UITableView和UICollectionView的无埋点采集</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-5-UIGestureRecognizer的无埋点采集"><span class="nav-number">0.1.</span> <span class="nav-text">3.5 UIGestureRecognizer的无埋点采集</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3.5"><span class="nav-number"></span> <span class="nav-text">3.5 UIGestureRecognizer的无埋点采集</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#四、总结"><span class="nav-number">1.</span> <span class="nav-text">四、总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4"><span class="nav-number"></span> <span class="nav-text">四、总结</span></a></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" href="https://hexo.io">Hexo</a></div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.2</div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
